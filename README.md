@@ -34,6 +34,7 @@ create local.conf:
 check summary log at /opt/stack/logs:
 
 ```
+# add environmental variables for the user and the project you want
 source /opt/stack/devstack/openrc [user] [project]
 openstack --version
 openstack service list
@@ -46,6 +47,7 @@ http://188.34.101.189/dashboard
 # 3. VM Deployment
 
 create a key pair
+
 add rules to the default security group for ssh and icmp
 
 ```
