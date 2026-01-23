@@ -34,7 +34,7 @@ create local.conf:
 check summary log at /opt/stack/logs:
 
 ```
-# add environmental variables for the user and the project you want
+# load credentials for the user and the project you want
 source /opt/stack/devstack/openrc [user] [project]
 openstack --version
 openstack service list
