@@ -1,5 +1,6 @@
 # 1. Install terraform
 # 1.1. Preparation to terraform installation
+
 ```
 #creating a new project
 source /opt/stack/devstack/openrc admin admin
@@ -14,49 +15,62 @@ unzip terraform.zip
 sudo mv terraform /usr/local/bin
 
 ```
+
 # 1.2. Validation
+
 ```
 terraform -version
 terraform validate
 ```
-# 1.3. Init terraform
-```
-//added provider to main.tf
-terraform init
-//edited provider in main.tf
-terraform init -upgrade
 
-```
+# 1.3. Init terraform
+
+
+added provider to main.tf
+`terraform init`
+edited provider in main.tf
+`terraform init -upgrade`
+
+
 # 1.4. Creating tf files and provisioning k8s cluster
 
-//Script for easy tf files transfer
+Script for easy tf files transfer
 ```
 #copy files from local to remote
 scp week2/tf_files/*.tf stack@188.34.101.189:~/terraform
 ```
 
-//importing existing networks
+importing existing networks
+```
 terraform import openstack_networking_network_v2.public 991250c0-a2f4-4d9e-858f-867d176092ba
 terraform import openstack_networking_subnet_v2.public_subnet 8c8242c1-b4d3-4de7-af97-a9e11fed3887
-#creating a keypair
-openstack keypair create --type ssh clusterkeys > cluster
+```
 
-# 2. k8s install
+#creating a keypair
+`openstack keypair create --type ssh clusterkeys > cluster`
+
+# 2. k8s installation
 [k8s install](scripts/init.sh)
 
 some commands for checking health
+```
 kubectl get nodes
 kubectl get componentstatuses
 kubectl get pods -n kube-system
 kubectl get --raw='/readyz?verbose'
 kubectl cluster-info
+```
 
 #test with a simple pod
+
+```
 kubectl run smoke-test --image=busybox --restart=Never -- sleep 10
 kubectl get pod smoke-test
-
+```
 
 # get api running
+
+```
 #copy kubectl config to accessible folder
 mkdir -p $HOME/.kube
 sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -69,3 +83,6 @@ kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 echo "bpffs /sys/fs/bpf bpf defaults 0 0" | sudo tee -a /etc/fstab
 #restart
 sudo systemctl restart kubelet
+```
+
+# 3. Test deployments using k8s
