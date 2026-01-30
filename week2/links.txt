@@ -1,0 +1,22 @@
+https://spacelift.io/blog/terraform-tutorial
+https://www.youtube.com/watch?v=_45W3Z8XWL4
+https://github.com/nicholasjackson/demo-terraform-basics
+https://nws.netways.de/en/blog/2023/06/16/terraform-and-openstack/
+
+some examples
+https://opensource.com/article/23/1/terraform-manage-openstack-cluster
+
+official docs and references
+!https://developer.hashicorp.com/terraform/language/syntax/configuration
+https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest
+
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/
+containerd installation guide https://github.com/containerd/containerd/blob/main/docs/getting-started.md
+
+https://kubernetes.io/docs/setup/production-environment/container-runtimes/
+https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
+https://kubernetes.io/docs/reference/networking/ports-and-protocols/
+https://kubernetes.io/docs/concepts/workloads/pods/
+https://dev.to/naveens16/kubectl-demystified-mastering-the-kubectl-get-command-a81
+
