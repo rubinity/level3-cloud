@@ -42,7 +42,7 @@ terraform import openstack_networking_subnet_v2.public_subnet 8c8242c1-b4d3-4de7
 openstack keypair create --type ssh clusterkeys > cluster
 
 # 2. k8s install
-[k8s install](/scripts/init.sh)
+[k8s install](scripts/init.sh)
 
 some commands for checking health
 kubectl get nodes
