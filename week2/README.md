@@ -111,7 +111,7 @@ Tutorial: https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/depl
 
 ```
 #create deployment
-create deployment kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1
+kubectl create deployment kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1
 #check the deployment, it takes time for it to get ready
 kubectl get deployments
 #open a proxy server in another window
