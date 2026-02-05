@@ -1,65 +1,63 @@
-resource "kubernetes_namespace_v1" "test-namespace" {
-  metadata {
-    name = "test-namespace"
-  }
-}
-
 resource "kubernetes_namespace_v1" "ot-operators" {
   metadata {
     name = "ot-operators"
   }
 }
 
-resource "helm_release" "redis-operator" {
-  name       = "redis-operator"
-  namespace   = "ot-operators"
-  repository = "https://ot-container-kit.github.io/helm-charts/"
-  chart      = "redis-operator"
-# for upgrade insert the correct version into the next line, uncomment it and apply using terrafor
-#   version    = ""
 
-  set = [
-    {
-    name  = "featureGates.GenerateConfigInInitContainer"
-    value = true
+
+
+
+resource "kubernetes_pod_v1" "redis-ext" {
+  metadata {
+    name = "terraform-example"
+  }
+
+  spec {
+    container {
+      image = "nginx:1.21.6"
+      name  = "example"
+
+      env {
+        name  = "environment"
+        value = "test"
+      }
+
+      port {
+        container_port = 80
+      }
+
+      liveness_probe {
+        http_get {
+          path = "/"
+          port = 80
+
+          http_header {
+            name  = "X-Custom-Header"
+            value = "Awesome"
+          }
+        }
+
+        initial_delay_seconds = 3
+        period_seconds        = 3
+      }
     }
-  ]
+
+    dns_config {
+      nameservers = ["1.1.1.1", "8.8.8.8", "9.9.9.9"]
+      searches    = ["example.com"]
+
+      option {
+        name  = "ndots"
+        value = 1
+      }
+
+      option {
+        name = "use-vc"
+      }
+    }
+
+    dns_policy = "None"
+  }
 }
 
-resource "helm_release" "redis-replication" {
-  name       = "redis-replication"
-  namespace   = "ot-operators"
-  repository = "https://ot-container-kit.github.io/helm-charts/"
-  chart      = "redis-replication"
-
-  set = [
-    {
-    name  = "redisreplication.clusterSize"
-    value = "3"
-    }
-  ]
-}
-
-# helm install redis-replication ot-helm/redis-replication \
-#   --set redisreplication.clusterSize=3 --namespace ot-operators
-
-# helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
-# $ helm install redis-operator ot-helm/redis-operator --namespace ot-operators --set featureGates.GenerateConfigInInitContainer=true
-# ...
-
-# data "kubernetes_endpoints_v1" "endpoints" {
-#     metadata {
-#       name      = "my-service"
-#       namespace = "default"
-#     }
-# }
-
-# output "k8s_api_endpoint" {
-#   value = kubernetes.host
-# }
-
-# kubernetes_endpoints_v1
-# output "ske_api_endpoint" {
-#   description = "The Kubernetes API endpoint for the STACKIT cluster"
-#   value       = stackit_ske_cluster.mariia-cluster.api_address
-# }

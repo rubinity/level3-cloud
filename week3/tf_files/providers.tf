@@ -8,16 +8,11 @@ terraform {
 }
 
 provider "stackit" {
-  # Configuration options
 credentials_path = "/Users/mariia.rubina13/Projects/cloud/week3/credentials/credentials.json"
 }
 
 provider "kubernetes" {
   config_path    = "~/.kube/config"
-  # host                   = yamldecode(stackit_ske_kubeconfig.example.kube_config).clusters.0.cluster.server
-  # client_certificate     = base64decode(yamldecode(stackit_ske_kubeconfig.kconfig).users.0.user.client-certificate-data)
-  # client_key             = base64decode(yamldecode(stackit_ske_kubeconfig.kconfig).users.0.user.client-key-data)
-  # cluster_ca_certificate = base64decode(yamldecode(stackit_ske_kubeconfig.kconfig).clusters.0.cluster.certificate-authority-data)
 }
 
 provider "helm" {
@@ -25,7 +20,6 @@ provider "helm" {
       config_path    = "~/.kube/config"
     }
   }
-
 
 terraform {
   backend "s3" {

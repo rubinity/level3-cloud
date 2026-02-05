@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-ext
+  namespace: ot-operators  # your test namespace
+spec:
+  type: LoadBalancer        # StackIT will assign a public IP
+  selector:
+    app: redis-replication-0
+    redis-role: master
+    # role: master           # must match master pod labels
+  ports:
+    - port: 6379
+      targetPort: 6379

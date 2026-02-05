@@ -1,21 +1,10 @@
 terraform import openstack_networking_network_v2.public 991250c0-a2f4-4d9e-858f-867d176092ba
-https://docs.stackit.cloud/products/runtime/kubernetes-engine/basics/basics/
-https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs/resources/ske_cluster
-https://docs.api.eu01.stackit.cloud/documentation/ske
-https://github.com/stackitcloud/stackit-cli/blob/main/docs/stackit.md
-https://github.com/stackitcloud/stackit-cli/blob/main/docs/stackit_ske.md
 
-https://medium.com/developingnodes/mastering-kubernetes-operators-your-definitive-guide-to-starting-strong-70ff43579eb9
-https://www.youtube.com/watch?v=mTC3UZ8bHJc
-https://github.com/OT-CONTAINER-KIT/redis-operator
-https://ot-redis-operator.netlify.app/docs/installation/validation/
-
-https://redis.io/docs/latest/commands/info/
 mariia-cluster
 
-stackit auth activate-service-account --key-file /Users/mariia.rubina13/Projects/cloud/week3/credentials/credentials.json
-stackit auth activate-service-account --private-key-path /Users/mariia.rubina13/.ssh/sa-key-dadde60a-e135-4d29-a4dd-c996b87c51cf-private.pem
+
 export STACKIT_SERVICE_ACCOUNT_KEY=/Users/mariia.rubina13/Projects/cloud/week3/credentials/credentials.json
+stackit auth activate-service-account
 export KUBERNETES_SERVICE_HOST=https://api.mar-cluster.38183bc8e9.s.ske.eu01.onstackit.cloud
 ske id 261006cb-88f1-4a5a-b4cb-1341dad5f39b 
 access via cubctl
@@ -78,7 +67,7 @@ kubectl -n olm patch deployment catalog-operator \
       "value": "api.mar-cluster.38183bc8e9.s.ske.eu01.onstackit.cloud"
     }
   }]'
-
+kubectl run debug-pod --rm -i --tty --image=bitnami/kubectl --restart=Never
 kubectl -n olm run debug-pod --rm -i --tty --image=bitnami/kubectl --restart=Never \
   --env="KUBERNETES_SERVICE_HOST=api.mar-cluster.38183bc8e9.s.ske.eu01.onstackit.cloud" \
   --overrides='
@@ -125,3 +114,43 @@ INFO SERVER
 check delete behavior
 kubectl get pods -n ot-operators -w
 kubectl delete pod -n ot-operators redis-replication-2
+
+stackit ske cluster hibernate mar-cluster
+
+Activate service account authentication in the STACKIT CLI using a service account key which includes the private key
+  $ stackit auth activate-service-account --service-account-key-path path/to/service_account_key.json
+
+  Activate service account authentication in the STACKIT CLI using the service account key and explicitly providing the private key in a PEM encoded file, which will take precedence over the one in the service account key
+  $ stackit auth activate-service-account --service-account-key-path path/to/service_account_key.json --private-key-path path/to/private.key
+
+  Activate service account authentication in the STACKIT CLI using the service account token
+  $ stackit auth activate-service-account --service-account-token my-service-account-token
+
+  Only print the corresponding access token by using the service account token. This access token can be stored as environment variable (STACKIT_ACCESS_TOKEN) in order to be used for all subsequent commands.
+  $ stackit auth activate-service-account --service-account-token my-service-account-token --only-print-access-token
+
+
+
+  kubectl run net-debug \
+  --rm -it \
+  --restart=Never \
+  --image=curlimages/curl:8.5.0 \
+  -- sh
+
+  nslookup bootcamp-service.default.svc.cluster.local
+
+  http://188.34.74.142
+kubectl exec -it kubernetes-bootcamp-658f6cbd58-vsp4k -- netstat -tlnp
+kubectl exec -it kubernetes-bootcamp-658f6cbd58-vsp4k -- ss -tln
+89e2ca32-744b-465a-9888-c0e43c75c54a mar
+ 057e3708-444b-4e14-a903-26fe80f51d3b
+
+  IPv4: allow all incoming udp traffic with port range 30000-32767 │ udp      │ ingress   │ IPv4       │ 30000-32767 │ 0.0.0.0/0    
+
+  curl http://188.34.74.71
+  redis-cli -h 188.34.73.3 -p 6379
+  brew install redis
+  redis-cli --version
+
+  redis-ext    LoadBalancer   100.82.77.115    188.34.73.3   6379:31548/TCP   12m
+  simple-web   LoadBalancer   100.82.156.129   188.34.74.71   80:30676/TCP   60m
