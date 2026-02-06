@@ -1,4 +1,9 @@
 terraform {
+  required_version = ">= 1.14.4"
+}
+
+
+terraform {
   required_providers {
     stackit = {
       source = "stackitcloud/stackit"

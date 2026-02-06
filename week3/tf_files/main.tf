@@ -31,9 +31,7 @@ resource "stackit_ske_kubeconfig" "kconfig" {
 
 }
 
-# output "api_endpoint_from_kubeconfig" {
-#   value = yamldecode(
-#     stackit_ske_kubeconfig.kconfig.kube_config
-#   )["clusters"][0]["cluster"]["server"]
-#   sensitive = true
-# }
+output "kconfig_yaml" {
+  value = stackit_ske_kubeconfig.kconfig.kube_config
+  sensitive = true
+}

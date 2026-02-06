@@ -154,3 +154,15 @@ kubectl exec -it kubernetes-bootcamp-658f6cbd58-vsp4k -- ss -tln
 
   redis-ext    LoadBalancer   100.82.77.115    188.34.73.3   6379:31548/TCP   12m
   simple-web   LoadBalancer   100.82.156.129   188.34.74.71   80:30676/TCP   60m
+
+  curl http://kubernetes-bootcamp.default.svc.cluster.local:8080
+curl http://localhost:8001/api/v1/namespaces/default/pods/test-service:8080/proxy/
+
+stackit config set --project-id 261006cb-88f1-4a5a-b4cb-1341dad5f39b
+
+```
+stackit config set --project-id xxxx-xxxx-xxxxx
+stackit config unset --project-id 
+stackit ske enable -p [Project ID] 
+
+```
