@@ -16,19 +16,25 @@ resource "helm_release" "redis-operator" {
     }
   ]
 }
-
+# redis cluster
+# $ helm upgrade redis ot-helm/redis -f custom-values.yaml \
+#     --install --namespace ot-operators
+# $ helm upgrade redis-cluster ot-helm/redis-cluster -f custom-values.yaml \
+#   --set redisCluster.clusterSize=3 --install --namespace ot-operators
 # helm_release for redis replication corresponds to  the following CLI command:
 # helm install redis-operator ot-helm/redis-operator --namespace ot-operators --set featureGates.GenerateConfigInInitContainer=true
-resource "helm_release" "redis-replication" {
-  name       = "redis-replication"
-  namespace   = "ot-operators"
-  repository = "https://ot-container-kit.github.io/helm-charts/"
-  chart      = "redis-replication"
+# resource "helm_release" "redis-replication" {
+#   name       = "redis-replication"
+#   namespace   = "ot-operators"
+#   repository = "https://ot-container-kit.github.io/helm-charts/"
+#   chart      = "redis-replication"
+#   values = [
+#     file("${path.module}/manifest/resources/values.yaml")
+#   ]
+# }
 
-  set = [
-    {
-    name  = "redisreplication.clusterSize"
-    value = "3"
-    }
-  ]
-}
+# redis standalone
+
+
+
+
