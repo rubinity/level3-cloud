@@ -1,0 +1,123 @@
+Go installatyion
+mkdir -p $HOME/tools
+tar -C $HOME/tools -xzf go1.22.*.darwin-*.tar.gz
+add to path
+export GOROOT="$HOME/tools/go"
+export GOPATH="$HOME/go"
+export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+source ~/.zshrc
+
+tutorial gin\
+go mod init
+go mod init path
+go get .
+go run .
+curl http://localhost:8080/albums/2
+curl http://localhost:8080/albums \
+    --include --header \
+    "Content-Type: application/json" \
+    --request "POST" --data \
+    '{"id": "4","title": "The Modern Sound of Betty Carter","artist": "Betty Carter","price": 49.99}'
+
+docker login registry.onstackit.cloud 
+docker tag api_image registry.onstackit.cloud/mariia-api/api_image:latest
+docker push registry.onstackit.cloud/mariia-api/api_image:latest
+
+kubectl create secret docker-registry registry.onstackit.cloud \
+  --docker-server=<docker-registry-server> \
+  --docker-username=<docker-user> \
+  --docker-password=<docker-password> \
+  --docker-email=<docker-email>
+
+kubectl create secret docker-registry stackit-registry \
+  --docker-server=registry.stackit.cloud \
+  --docker-username=_json_key \
+  --docker-password="$(cat service-account-key.json)" \
+  --docker-email=unused@example.com
+
+kubectl create secret docker-registry stackit-registry \
+  --docker-server=registry.stackit.cloud \
+  --docker-username='robot$mariia-api+api-robot'\
+  --docker-password='IZJOIB8GjVMVhUrKytWnLTTlD8tJcXCK' \
+  --docker-email=mariia.rubina13@gmail.com
+
+kubectl create secret docker-registry stackit-registry \
+  --docker-server=registry.stackit.cloud \
+  --docker-username='mariia.rubina13@gmail.com' \
+  --docker-password='iCXcos7diXSrd5htectiTYEPde7prxPs' \
+  --docker-email='mariia.rubina13@gmail.com'
+
+  kubectl create secret docker-registry stackit-registry \
+  --docker-server=registry.stackit.cloud \
+  --docker-username='robot$mariia-api+robo'\
+  --docker-password='ERufUOGgVZnbjT5VimH88iHzsgWG16ls' \
+  --docker-email=mariia.rubina13@gmail.com
+
+
+
+
+docker login registry.onstackit.cloud \
+  --username 'robot$mariia-api+api-robot' \
+  --password 'IZJOIB8GjVMVhUrKytWnLTTlD8tJcXCK'
+
+docker login registry.onstackit.cloud \
+  --username 'mariia.rubina13@gmail.com' \
+  --password 'iCXcos7diXSrd5htectiTYEPde7prxPs'
+
+  kubectl get secret stackit-registry -n default -o jsonpath="{.data.\.dockerconfigjson}" | base64 --decode
+
+  kubectl create secret docker-registry stackit-registry  --from-file='Users/mariia.rubina13/credentials/robot$mariia-api+api-robot.json'
+
+kubectl create secret docker-registry secr --docker-server=registry.stackit.cloud --docker-username=mariia.rubina13@gmail.com --docker-password=iCXcos7diXSrd5htectiTYEPde7prxPs --docker-email=mariia.rubina13@gmail.com
+
+docker tag api_image:latest rubinity/mariia-api:latest
+docker push rubinity/mariia-api:latest
+
+
+curl http://api.default.svc.cluster.local:80
+curl http://api.default.svc.cluster.local:80/hello
+nslookup api.default.svc.cluster.local
+
+curl -v http://100.64.1.17:80/hello
+
+curl -H 'Content-Type: application/json' \
+      -d '{ "title":"foo","body":"bar", "id": 1}' \
+      -X POST \
+      http://localhost/createReplication
+
+
+create client
+GOOS=linux GOARCH=amd64 go build -o ./app .
+docker buildx build --platform linux/amd64 -t go_client .
+docker logout
+docker login
+docker tag go_client:latest rubinity/go-client:latest
+docker push rubinity/go-client:latest
+
+service acounts
+kubectl create serviceaccount goapi-sa
+!!downgrade later - use a more precise role
+kubectl create clusterrolebinding goapi-bind --clusterrole=cluster-admin --serviceaccount=default:goapi-sa
+in pod
+serviceAccountName: goapi-sa
+
+
+kubectl auth can-i list pods \
+  --as=system:serviceaccount:default:goapi-sa \
+  --all-namespaces
+
+kubectl get clusterrolebinding goapi-bind -o yaml
+
+
+
+
+
+// curl -H 'Content-Type: application/json' \
+//       -d '{ "number": 3, "namespace": "myspace"}' \
+//       -X POST \
+//       http://localhost/createReplication
+
+// curl -H 'Content-Type: application/json' \
+//       -d '{ "number": 3, "namespace": "test-ns", "name": "newrepl"}' \
+//       -X POST \
+//       http://188.34.109.28/create

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      serviceAccountName: goapi-sa
+      containers:
+      - name: api-cont
+        image: rubinity/mariia-api:latest
+        ports:
+        - containerPort: 80
