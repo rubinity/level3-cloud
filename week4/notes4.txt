@@ -68,6 +68,7 @@ docker login registry.onstackit.cloud \
 
   kubectl create secret docker-registry stackit-registry  --from-file='Users/mariia.rubina13/credentials/robot$mariia-api+api-robot.json'
 
+kubectl create secret docker-registry stackit-registry  --from-file='Users/mariia.rubina13/credentials/robot$mariia-api+api-robot.json'
 kubectl create secret docker-registry secr --docker-server=registry.stackit.cloud --docker-username=mariia.rubina13@gmail.com --docker-password=iCXcos7diXSrd5htectiTYEPde7prxPs --docker-email=mariia.rubina13@gmail.com
 
 docker tag api_image:latest rubinity/mariia-api:latest

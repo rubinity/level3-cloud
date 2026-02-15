@@ -15,8 +15,6 @@ spec:
       serviceAccountName: goapi-sa
       containers:
       - name: api-cont
-        image: registry.onstackit.cloud/mariia-api/api_image:latest
+        image: rubinity/mariia-api:latest
         ports:
         - containerPort: 80
-      imagePullSecrets:
-        - name: stackit-registry
