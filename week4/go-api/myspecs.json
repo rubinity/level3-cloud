@@ -1,0 +1,51 @@
+{
+  "swagger": "2.0",
+  "paths": {
+    "/connection/{ns}/{name}": {
+      "get": {
+        "description": "Returns connection information by namespace and name.",
+        "tags": [
+          "connection"
+        ],
+        "summary": "Get connection info",
+        "operationId": "getConnection",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ConnectionResponse"
+          }
+        }
+      }
+    },
+    "/create": {
+      "post": {
+        "description": "Creates a redis replication cluster by namespace, name and size. The size can't be less than 1 or greater than 3 and is set to 3 if the value is wrong or undefined",
+        "tags": [
+          "redis"
+        ],
+        "summary": "Create a redis replication",
+        "operationId": "createRepl",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "Size",
+            "name": "size",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Namespace",
+            "name": "namespace",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "name": "name",
+            "in": "query"
+          }
+        ]
+      }
+    }
+  }
+}

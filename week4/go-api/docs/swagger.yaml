@@ -1,0 +1,155 @@
+definitions:
+  api.DeleteRequest:
+    properties:
+      name:
+        type: string
+      namespace:
+        type: string
+    type: object
+  api.RRInfo:
+    properties:
+      kind:
+        type: string
+      name:
+        type: string
+      status: {}
+    type: object
+  api.ReplicationRequest:
+    properties:
+      name:
+        type: string
+      namespace:
+        type: string
+      size:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /connection/{ns}/{name}:
+    get:
+      description: Returns connection information by namespace and name
+      parameters:
+      - description: Replication info
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.ReplicationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Creation result
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get connection info
+      tags:
+      - connection
+  /create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a redis replication cluster by namespace, name and size.
+        The size can't be less than 1 or greater than 3 and is set to 3 if the value
+        is wrong or undefined
+      parameters:
+      - description: Creation info
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.ReplicationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Creation result
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create replication
+      tags:
+      - redis
+      - replication
+  /delete:
+    post:
+      consumes:
+      - application/json
+      description: Deletes a redis replication cluster by name and namespace
+      parameters:
+      - description: Replication info
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.DeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deletion result
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete replication
+      tags:
+      - redis
+      - replication
+  /list{ns}:
+    get:
+      description: Returns a list of replications in a namespace
+      parameters:
+      - description: Replication info
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.ReplicationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Replication list
+          schema:
+            $ref: '#/definitions/api.RRInfo'
+      summary: Get list
+      tags:
+      - redis list
+swagger: "2.0"

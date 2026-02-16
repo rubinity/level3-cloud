@@ -68,6 +68,17 @@ func SetRepl() * v1beta2.RedisReplication{
 	return fakeRepl
 }
 
+// func SetUndelRepl() * v1beta2.RedisReplication{
+// 	fakeRepl := &v1beta2.RedisReplication{
+//     ObjectMeta: metav1.ObjectMeta{
+//         Name:      "realname",   // match the name in your request
+//         Namespace: "realns",     // match the namespace in your request
+//     },
+// 	}
+// 	fakeRepl.Dele
+// 	return fakeRepl
+// }
+
 func InitClients(fakeService * corev1.Service, fakeRepl * v1beta2.RedisReplication)(cli client.Client, clientset kubernetes.Interface){
 	scheme := runtime.NewScheme()
 	v1beta2.AddToScheme(scheme)
@@ -87,6 +98,7 @@ func InitClients(fakeService * corev1.Service, fakeRepl * v1beta2.RedisReplicati
 
 // {"connection":{"host":"repl4-master.test2.svc.cluster.local","port":6379},"public_ip":"188.34.110.196"}
 
+// happy path
 func TestConnection(t *testing.T) {
 	fakeService := SetService()
 	fakeRepl := SetRepl()
@@ -112,6 +124,7 @@ func TestConnection(t *testing.T) {
 	}
 }
 
+// not found because of the wrong namespace
 func TestConnectionFakeNS(t *testing.T) {
 	fakeService := SetService()
 	fakeRepl := SetRepl()
@@ -137,6 +150,7 @@ func TestConnectionFakeNS(t *testing.T) {
 	}
 }
 
+// not found because doesn't exist
 func TestConnectionFakename(t *testing.T) {
 	fakeService := SetService()
 	fakeRepl := SetRepl()
@@ -162,6 +176,7 @@ func TestConnectionFakename(t *testing.T) {
 	}
 }
 
+//no associated service
 func TestConnectionNoService(t *testing.T) {
 	// fakeService := SetService()
 	fakeRepl := SetRepl()

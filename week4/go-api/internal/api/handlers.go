@@ -17,12 +17,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// @Summary Get list
+// @Description Returns a list of replications in a namespace
+// @Tags redis list
+// @Produce json
+// @Param body body ReplicationRequest true "Replication info"
+// @Success 200 {object} RRInfo "Replication list"
+// @Router /list{ns} [get]
 func ListReplHandler(cli client.Client) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var data []RRInfo
 		namespace := c.Param("ns")
-		// fmt.Println(namespace)
 		list := getlist(cli, c.Request.Context(), namespace, "")
 		for _, item := range list.Items {
 			itemdata := RRInfo{
@@ -39,6 +45,15 @@ func ListReplHandler(cli client.Client) gin.HandlerFunc {
 	}
 }
 
+// @Summary Get connection info
+// @Description Returns connection information by namespace and name
+// @Tags connection
+// @Produce json
+// @Param body body ReplicationRequest true "Replication info"
+// @Success 200 {object} map[string]interface{}"Creation result"
+// @Failure 400 {object} map[string]interface{} "Bad request"
+// @Failure 404 {object} map[string]interface{} "Not found"
+// @Router /connection/{ns}/{name} [get]
 func ConnectionHandler(cli client.Client, clientset kubernetes.Interface) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
@@ -66,6 +81,17 @@ func ConnectionHandler(cli client.Client, clientset kubernetes.Interface) gin.Ha
 	}
 }
 
+
+// @Summary Create replication
+// @Description Creates a redis replication cluster by namespace, name and size. The size can't be less than 1 or greater than 3 and is set to 3 if the value is wrong or undefined
+// @Tags redis, replication
+// @Accept json
+// @Produce json
+// @Param body body ReplicationRequest true "Creation info"
+// @Success 200 {object} map[string]interface{}"Creation result"
+// @Failure 400 {object} map[string]interface{} "Bad request"
+// @Failure 404 {object} map[string]interface{} "Not found"
+// @Router /create [post]
 func CreateReplHandler(cli client.Client) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
@@ -89,38 +115,50 @@ func CreateReplHandler(cli client.Client) gin.HandlerFunc {
 			})
 		} else {
 			c.JSON(http.StatusOK, gin.H{
-				"status": fmt.Sprintf("%s created.", req.Name),
+				"status": fmt.Sprintf("Replication %s created. Cluster size: %d", req.Name, size),
 			})
 		}
 	}
 }
 
-func jsonError(c *gin.Context, name string, err string) {
-	c.JSON(http.StatusOK, gin.H{
-		"name":   name,
+func jsonError(c *gin.Context, code int, name string, err string) {
+	c.JSON(code, gin.H{
 		"status": fmt.Sprintf("%s not deleted. Error: %s", name, err),
 	})
 }
 
+// @Summary Delete replication
+// @Description Deletes a redis replication cluster by name and namespace
+// @Tags redis, replication
+// @Accept json
+// @Produce json
+// @Param body body DeleteRequest true "Replication info"
+// @Success 200 {object} map[string]interface{} "Deletion result"
+// @Failure 400 {object} map[string]interface{} "Bad request"
+// @Failure 404 {object} map[string]interface{} "Not found"
+// @Failure 409 {object} map[string]interface{} "Conflict"
+// @Router /delete [post]
 func DeleteReplHandler(cli client.Client) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var req DeleteRequest
 		var err error
 		if err = c.ShouldBindJSON(&req); err != nil {
-			c.JSON(400, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 		repl, err := GetRepl(cli, c.Request.Context(), req.Namespace, req.Name)
-		if err == nil {
-			err = cli.Delete(c.Request.Context(), repl)
-			if err == nil {
-				c.JSON(http.StatusOK, gin.H{
-					"name":   repl.Name,
-					"status": "deleted",
-				})
-				return
-			}
+		if err != nil {
+			jsonError(c, http.StatusNotFound, req.Name, err.Error())
+			return
 		}
-		jsonError(c, req.Name, err.Error())
+		err = cli.Delete(c.Request.Context(), repl)
+		if err != nil {
+			jsonError(c, http.StatusConflict, req.Name, err.Error())
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"status": fmt.Sprintf("%s deleted.", req.Name),
+		})
 	}
 }

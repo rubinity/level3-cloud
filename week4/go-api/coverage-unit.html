@@ -55,11 +55,11 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">Users/mariia.rubina13/Projects/cloud/week4/go-api/internal/api/api.go (34.3%)</option>
+				<option value="file0">Users/mariia.rubina13/Projects/cloud/week4/go-api/internal/api/api.go (54.3%)</option>
 				
-				<option value="file1">Users/mariia.rubina13/Projects/cloud/week4/go-api/internal/api/handlers.go (52.0%)</option>
+				<option value="file1">Users/mariia.rubina13/Projects/cloud/week4/go-api/internal/api/handlers.go (96.2%)</option>
 				
-				<option value="file2">Users/mariia.rubina13/Projects/cloud/week4/go-api/internal/api/helpers.go (71.1%)</option>
+				<option value="file2">Users/mariia.rubina13/Projects/cloud/week4/go-api/internal/api/helpers.go (81.6%)</option>
 				
 				</select>
 			</div>
@@ -156,19 +156,19 @@ func GetRepl(cli client.Client, ctx context.Context, namespace string, name stri
         return &amp;repl, err
 }</span>
 
-func getlist(cli client.Client, ctx context.Context, namespace string, name string) *v1beta2.RedisReplicationList <span class="cov0" title="0">{
+func getlist(cli client.Client, ctx context.Context, namespace string, name string) *v1beta2.RedisReplicationList <span class="cov8" title="1">{
         var redislist v1beta2.RedisReplicationList
         var err error
         if namespace == "" &amp;&amp; name == "" </span><span class="cov0" title="0">{
                 err = cli.List(ctx, &amp;redislist)
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 opts := setOpts(namespace, name)
                 err = cli.List(ctx, &amp;redislist, opts)
         }</span>
-        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
                 fmt.Println(err.Error())
         }</span>
-        <span class="cov0" title="0">return &amp;redislist</span>
+        <span class="cov8" title="1">return &amp;redislist</span>
 }
 </pre>
 		
@@ -193,12 +193,11 @@ import (
 
 func ListReplHandler(cli client.Client) gin.HandlerFunc <span class="cov8" title="1">{
 
-        return func(c *gin.Context) </span><span class="cov0" title="0">{
+        return func(c *gin.Context) </span><span class="cov8" title="1">{
                 var data []RRInfo
                 namespace := c.Param("ns")
-                // fmt.Println(namespace)
                 list := getlist(cli, c.Request.Context(), namespace, "")
-                for _, item := range list.Items </span><span class="cov0" title="0">{
+                for _, item := range list.Items </span><span class="cov8" title="1">{
                         itemdata := RRInfo{
                                 Kind:   item.Kind,
                                 Name:   item.Name,
@@ -206,10 +205,10 @@ func ListReplHandler(cli client.Client) gin.HandlerFunc <span class="cov8" title
                         }
                         data = append(data, itemdata)
                 }</span>
-                <span class="cov0" title="0">if data == nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if data == nil </span><span class="cov8" title="1">{
                         data = make([]RRInfo, 0)
                 }</span>
-                <span class="cov0" title="0">c.JSON(http.StatusOK, data)</span>
+                <span class="cov8" title="1">c.JSON(http.StatusOK, data)</span>
         }
 }
 
@@ -245,14 +244,14 @@ func CreateReplHandler(cli client.Client) gin.HandlerFunc <span class="cov8" tit
         return func(c *gin.Context) </span><span class="cov8" title="1">{
                 var repl v1beta2.RedisReplication
                 var req ReplicationRequest
-                if err := c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+                if err := c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov8" title="1">{
                         c.JSON(http.StatusBadRequest, gin.H{
                                 "status": fmt.Sprintf("Not created. Error: %s", err.Error()),
                         })
                         return
                 }</span>
                 <span class="cov8" title="1">size := int32(req.Size)
-                if size &lt; 1 || size &gt; 3 </span><span class="cov0" title="0">{
+                if size &lt; 1 || size &gt; 3 </span><span class="cov8" title="1">{
                         size = 3
                 }</span>
                 <span class="cov8" title="1">setResource(&amp;repl, req.Name, req.Namespace, size)
@@ -263,39 +262,40 @@ func CreateReplHandler(cli client.Client) gin.HandlerFunc <span class="cov8" tit
                         })
                 }</span> else<span class="cov8" title="1"> {
                         c.JSON(http.StatusOK, gin.H{
-                                "status": fmt.Sprintf("%s created.", req.Name),
+                                "status": fmt.Sprintf("Replication %s created. Cluster size: %d", req.Name, size),
                         })
                 }</span>
         }
 }
 
-func jsonError(c *gin.Context, name string, err string) <span class="cov0" title="0">{
-        c.JSON(http.StatusOK, gin.H{
-                "name":   name,
+func jsonError(c *gin.Context, code int, name string, err string) <span class="cov8" title="1">{
+        c.JSON(code, gin.H{
                 "status": fmt.Sprintf("%s not deleted. Error: %s", name, err),
         })
 }</span>
 
 func DeleteReplHandler(cli client.Client) gin.HandlerFunc <span class="cov8" title="1">{
 
-        return func(c *gin.Context) </span><span class="cov0" title="0">{
+        return func(c *gin.Context) </span><span class="cov8" title="1">{
                 var req DeleteRequest
                 var err error
                 if err = c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov0" title="0">{
-                        c.JSON(400, gin.H{"error": err.Error()})
+                        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                        return
                 }</span>
-                <span class="cov0" title="0">repl, err := GetRepl(cli, c.Request.Context(), req.Namespace, req.Name)
-                if err == nil </span><span class="cov0" title="0">{
-                        err = cli.Delete(c.Request.Context(), repl)
-                        if err == nil </span><span class="cov0" title="0">{
-                                c.JSON(http.StatusOK, gin.H{
-                                        "name":   repl.Name,
-                                        "status": "deleted",
-                                })
-                                return
-                        }</span>
-                }
-                <span class="cov0" title="0">jsonError(c, req.Name, err.Error())</span>
+                <span class="cov8" title="1">repl, err := GetRepl(cli, c.Request.Context(), req.Namespace, req.Name)
+                if err != nil </span><span class="cov8" title="1">{
+                        jsonError(c, http.StatusNotFound, req.Name, err.Error())
+                        return
+                }</span>
+                <span class="cov8" title="1">err = cli.Delete(c.Request.Context(), repl)
+                if err != nil </span><span class="cov8" title="1">{
+                        jsonError(c, http.StatusConflict, req.Name, err.Error())
+                        return
+                }</span>
+                <span class="cov8" title="1">c.JSON(http.StatusOK, gin.H{
+                        "status": fmt.Sprintf("%s deleted.", req.Name),
+                })</span>
         }
 }
 </pre>
@@ -318,7 +318,7 @@ import (
         metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func setOpts(namespace string, name string) *client.ListOptions <span class="cov0" title="0">{
+func setOpts(namespace string, name string) *client.ListOptions <span class="cov8" title="1">{
         var opts client.ListOptions
         opts.Namespace = namespace
         if name != "" </span><span class="cov0" title="0">{
@@ -331,7 +331,7 @@ func setOpts(namespace string, name string) *client.ListOptions <span class="cov
                 }
                 <span class="cov0" title="0">opts.LabelSelector = labelSel</span>
         }
-        <span class="cov0" title="0">return &amp;opts</span>
+        <span class="cov8" title="1">return &amp;opts</span>
 }
 
 func setResource(rr *v1beta2.RedisReplication, name string, namespace string, replnum int32) <span class="cov8" title="1">{
