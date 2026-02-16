@@ -10,8 +10,8 @@ import (
 
 	"github.com/OT-CONTAINER-KIT/redis-operator/api/redisreplication/v1beta2"
 	"github.com/gin-gonic/gin"
-	"k8s.io/client-go/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 
 	// "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,17 +39,29 @@ func ListReplHandler(cli client.Client) gin.HandlerFunc {
 	}
 }
 
-func ConnectionHandler(cli client.Client, clientset *kubernetes.Clientset ) gin.HandlerFunc {
+func ConnectionHandler(cli client.Client, clientset kubernetes.Interface) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		namespace := c.Param("ns")
 		name := c.Param("name")
-		repl, _ := getRepl(cli, c.Request.Context(), namespace, name)
+		repl, err := GetRepl(cli, c.Request.Context(), namespace, name)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status": fmt.Sprintf("%s not found Error: %s", name, err.Error()),
+			})
+			return
+		}
 		service_name := name + "-additional"
-		service, _ := clientset.CoreV1().Services(namespace).Get(c.Request.Context(), service_name, metav1.GetOptions{})
+		service, err := clientset.CoreV1().Services(namespace).Get(c.Request.Context(), service_name, metav1.GetOptions{})
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status": fmt.Sprintf("service not found. Error: %s", err.Error()),
+			})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"connection": repl.Status.ConnectionInfo,
-			"public_ip": service.Status.LoadBalancer.Ingress[0].IP,
+			"public_ip":  service.Status.LoadBalancer.Ingress[0].IP,
 		})
 	}
 }
@@ -60,31 +72,26 @@ func CreateReplHandler(cli client.Client) gin.HandlerFunc {
 		var repl v1beta2.RedisReplication
 		var req ReplicationRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(400, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status": fmt.Sprintf("Not created. Error: %s", err.Error()),
+			})
+			return
 		}
-		fmt.Println(req.Name)
-		fmt.Println(req.Namespace)
-		fmt.Println(req.Size)
 		size := int32(req.Size)
 		if size < 1 || size > 3 {
 			size = 3
 		}
 		setResource(&repl, req.Name, req.Namespace, size)
-		// data, _ := json.MarshalIndent(repl.Spec, "", "  ")
-		// fmt.Println(string(data))
 		err := cli.Create(c.Request.Context(), &repl)
 		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"name":   repl.Name,
-				"status": fmt.Sprintf("%s not created. Error: %s", repl.Name, err.Error()),
+			c.JSON(http.StatusNotFound, gin.H{
+				"status": fmt.Sprintf("%s not created. Error: %s", req.Name, err.Error()),
 			})
 		} else {
 			c.JSON(http.StatusOK, gin.H{
-				"name":   repl.Name,
-				"status": "created",
+				"status": fmt.Sprintf("%s created.", req.Name),
 			})
 		}
-
 	}
 }
 
@@ -103,7 +110,7 @@ func DeleteReplHandler(cli client.Client) gin.HandlerFunc {
 		if err = c.ShouldBindJSON(&req); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 		}
-		repl, err := getRepl(cli, c.Request.Context(), req.Namespace, req.Name)
+		repl, err := GetRepl(cli, c.Request.Context(), req.Namespace, req.Name)
 		if err == nil {
 			err = cli.Delete(c.Request.Context(), repl)
 			if err == nil {
