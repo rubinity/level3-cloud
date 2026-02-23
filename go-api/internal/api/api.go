@@ -38,7 +38,9 @@ func Router(cli client.Client, clientset kubernetes.Interface) *gin.Engine {
 		log.Fatalf("%s not set", "ACCESS_SECRET")
 	}
 
-	rds := auth.NewRedis()
+	endpoint, _ := getEndpoint(clientset)
+	println("endp", endpoint)
+	rds := auth.NewRedis(endpoint)
 	router := gin.Default()
 	// router.Use(cors.Default())
 	router.Use(cors.New(cors.Config{
@@ -54,7 +56,7 @@ func Router(cli client.Client, clientset kubernetes.Interface) *gin.Engine {
 	router.POST("/api/create",  auth.AuthMiddleware(rds), CreateReplHandler(cli))
 	router.DELETE("/api/delete", auth.AuthMiddleware(rds), DeleteReplHandler(cli))
 	router.GET("/api/list/:ns", auth.AuthMiddleware(rds), ListReplHandler(cli))
-	router.POST("/api/auth", AuthHandler(rds))
+	router.POST("/api/auth", AuthHandler(rds, clientset))
 	router.POST("/api/logout", LogoutHandler(rds))
 	router.GET("/api/connection/:ns/:name", auth.AuthMiddleware(rds), ConnectionHandler(cli, clientset))
 	return router
@@ -90,6 +92,7 @@ func InitClients() (cli client.Client, clientset kubernetes.Interface) {
 	return cli, clientset
 }
 
+
 func createNamespace(clientset kubernetes.Interface, ctx context.Context, namespace string) {
 	ns := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -113,6 +116,7 @@ func GetRepl(cli client.Client, ctx context.Context, namespace string, name stri
 	err := cli.Get(ctx, key, &repl)
 	return &repl, err
 }
+
 
 func getlist(cli client.Client, ctx context.Context, namespace string, name string) *v1beta2.RedisReplicationList {
 	var redislist v1beta2.RedisReplicationList

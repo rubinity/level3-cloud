@@ -3,17 +3,20 @@ package api
 import (
 	// "log"
 	"net/http"
+	"strconv"
 
 	// "os/exec"
 	// "encoding/json"
-	"fmt"
 	"Users/mariia.rubina13/Projects/cloud/week4/go-api/internal/auth"
+	"fmt"
+
+	"context"
 
 	"github.com/OT-CONTAINER-KIT/redis-operator/api/redisreplication/v1beta2"
 	"github.com/gin-gonic/gin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"context"
+
 	// "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	// "github.com/joho/godotenv"
@@ -48,7 +51,7 @@ func ListReplHandler(cli client.Client) gin.HandlerFunc {
 }
 
 var demoUser = Namespace{ Namespace: "test2", Password: "pass"}
-func AuthHandler(rds *auth.Redis) gin.HandlerFunc {
+func AuthHandler(rds *auth.Redis, clientset kubernetes.Interface) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var in struct {
@@ -130,6 +133,16 @@ func ConnectionHandler(cli client.Client, clientset kubernetes.Interface) gin.Ha
 	}
 }
 
+func getEndpoint(clientset kubernetes.Interface) (endpoint string, err error){
+	service, err := clientset.CoreV1().Endpoints("redis-auth").Get(context.TODO(), "store-master", metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	ip := service.Subsets[0].Addresses[0].IP
+	port := int(service.Subsets[0].Ports[0].Port)
+	endpoint = ip + ":" + strconv.Itoa(port)
+	return endpoint, nil
+}
 
 // @Summary Create replication
 // @Description Creates a redis replication cluster by namespace, name and size. The size can't be less than 1 or greater than 3 and is set to 3 if the value is wrong or undefined

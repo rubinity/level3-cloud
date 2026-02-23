@@ -1,16 +1,18 @@
 package auth
 
-import(
+import (
 	"context"
 	// "os"
 	"time"
+
 	"github.com/redis/go-redis/v9"
 )
 
 type Redis struct{ Client *redis.Client }
 
-func NewRedis() *Redis {
-	addr := "100.64.0.23:6379" //!!!!later change to env
+func NewRedis(endpoint string) *Redis {
+	println("endpr", endpoint)
+	addr := endpoint //!!!!later change to env
 	// addr := os.Getenv("REDIS_ADDR")
 	// if addr == "" {
 	// 	addr = "localhost:6379"
