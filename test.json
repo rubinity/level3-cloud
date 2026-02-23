@@ -1,0 +1,15 @@
+{
+    "id": "dadde60a-e135-4d29-a4dd-c996b87c51cf",
+    "active": true,
+    "keyAlgorithm": "RSA_2048",
+    "keyOrigin": "GENERATED",
+    "keyType": "USER_MANAGED",
+    "publicKey": 
+    "credentials": {
+        "aud": "
+        "iss": "
+        "kid": 
+        "sub":
+        "privateKey":
+    }
+}

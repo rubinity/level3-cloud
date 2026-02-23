@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-ui
+  template:
+    metadata:
+      labels:
+        app: redis-ui
+    spec:
+      serviceAccountName: goapi-sa
+      containers:
+      - name: redisui-cont
+        image: registry.onstackit.cloud/mariia-api/redisui-image:latest
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+        - name: stackit-registry

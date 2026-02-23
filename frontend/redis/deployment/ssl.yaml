@@ -1,0 +1,15 @@
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-rubinity-stackit-gg
+spec:
+  secretName: wildcard-rubinity-stackit-gg-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: Issuer
+  commonName: '*.rubinity.stackit.gg'
+  duration: 8760h0m0s
+  dnsNames:
+    - rubinity.stackit.gg
+    - '*.rubinity.stackit.gg'

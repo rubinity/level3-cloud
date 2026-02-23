@@ -1,0 +1,10 @@
+[playground](https://kodekloud.com/public-playgrounds)  
+[guide](https://medium.com/developingnodes/mastering-kubernetes-operators-your-definitive-guide-to-starting-strong-70ff43579eb9)  
+[video](https://www.youtube.com/watch?v=mTC3UZ8bHJc)  
+
+output "api_endpoint_from_kubeconfig" {
+  value = yamldecode(
+    stackit_ske_kubeconfig.kconfig.kube_config
+  )["clusters"][0]["cluster"]["server"]
+  sensitive = true
+}

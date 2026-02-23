@@ -1,3 +1,7 @@
 cp.sh
 cp_keys.sh
 notes/
+week3/tf_files/.terraform/
+.terraform.lock.hcl
+week4/go-api/api
+week5/vue/node_modules

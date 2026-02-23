@@ -1,0 +1,112 @@
+kubectl create secret docker-registry stackit-registry \
+  --docker-server=registry.onstackit.cloud \
+  --docker-username='mariia.rubina13@gmail.com' \
+  --docker-password='iCXcos7diXSrd5htectiTYEPde7prxPs' \
+  --docker-email='mariia.rubina13@gmail.com'
+
+  kubectl create secret generic stackit-sa-authentication \
+--from-literal=sa.json='{
+    "id": "4e1fe486-b463-4bcd-9210-288854268e34",
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nPUBLIC_KEY\n-----END PUBLIC KEY-----",
+    "createdAt": "2024-04-02T13:12:17.678+00:00",
+    "validUntil": "2024-04-15T22:00:00.000+00:00",
+    "keyType": "USER_MANAGED",
+    "keyOrigin": "GENERATED",
+    "keyAlgorithm": "RSA_2048",
+    "active": true,
+    "credentials": {
+        "kid": "kid",
+        "iss": "iss",
+        "sub": "sub",
+        "aud": "aud",
+        "privateKey": "-----BEGIN PRIVATE KEY-----\nPRIVATE-KEY==\n-----END PRIVATE KEY-----"
+    }
+}'
+
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+      email: mariia.rubina13@gmail.com
+      privateKeySecretRef:
+        name: letsencrypt-prod
+      solvers:
+        - dns01:
+          webhook:
+            solverName: stackit
+            groupName: acme.stackit.de
+            config:
+              projectId: <STACKIT PROJECT ID>
+EOF
+
+
+/Users/mariia.rubina13/.ssh/sa-key-dadde60a-e135-4d29-a4dd-c996b87c51cf.json
+
+kubectl create secret generic stackit-sa-authentication \
+  --from-file=sa.json=/path/to/stackit-sa.json \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl create secret generic stackit-sa-authentication --from-file=sa.json='/Users/mariia.rubina13/.ssh/sa-key-dadde60a-e135-4d29-a4dd-c996b87c51cf.json' -n cert-manager 
+
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: example-app
+data:
+index.html: |
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <title>ExampleApp</title>
+        </head>
+        <body>
+            <header>
+                <h1 id="Hello World">Hello World</h1>
+            </header>
+        </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      labels:
+      app: example-app
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: config-volume
+              mountPath: /usr/share/nginx/html
+          volumes:
+            - name: config-volume
+          configMap:
+             name: example-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-app
+spec:
+  selector:
+    app: example-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+EOF

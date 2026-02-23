@@ -35,6 +35,35 @@ resource "helm_release" "redis-operator" {
 
 # redis standalone
 
+# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+# helm repo update
+# kubectl create ns ingress-nginx
+# helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx
 
 
+resource "helm_release" "ingress-nginx" {
+  name       = "ingress-nginx"
+  namespace   = "ingress-nginx"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+# for upgrade insert the correct version into the next line, uncomment it and apply using terrafor
+#   version    = ""
+}
 
+# helm repo add jetstack https://charts.jetstack.io
+# helm install cert-manager --namespace cert-manager jetstack/cert-manager --set webhook.timeoutSeconds=15 --set crds.enabled
+resource "helm_release" "redis-operator" {
+  name       = "redis-operator"
+  namespace   = "ot-operators"
+  repository = "https://ot-container-kit.github.io/helm-charts/"
+  chart      = "redis-operator"
+# for upgrade insert the correct version into the next line, uncomment it and apply using terrafor
+#   version    = ""
+
+  set = [
+    {
+    name  = "featureGates.GenerateConfigInInitContainer"
+    value = true
+    }
+  ]
+}

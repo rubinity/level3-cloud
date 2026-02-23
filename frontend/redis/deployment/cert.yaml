@@ -1,0 +1,21 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: mariia.rubina13@gmail.com
+    privateKeySecretRef:
+        name: letsencrypt-prod
+    solvers:
+      - dns01:
+          webhook:
+            solverName: stackit
+            groupName: acme.stackit.de
+            config:
+              projectId: 261006cb-88f1-4a5a-b4cb-1341dad5f39b
+              zone: stackit.gg
+              secretRef:
+                name: stackit-sa-authentication
+                key: sa-key-dadde60a-e135-4d29-a4dd-c996b87c51cf.json

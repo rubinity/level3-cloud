@@ -1,0 +1,2 @@
+./image.sh
+./deploy.sh
