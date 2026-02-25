@@ -1,5 +1,5 @@
 {
-  "title": "CPU usage",
+  "title": "Memory",
   "time": {
   "from": "now-15m",
   "to": "now"
@@ -10,7 +10,7 @@
   "panels": [
     {
       "type": "timeseries",
-      "title": "CPU",
+      "title": "Memory",
       "datasource": {
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
@@ -18,17 +18,12 @@
       "targets": [
         {
 
-        "expr": "before_nograd",
+        "expr": "scrape_duration_seconds",
           "legendFormat": "",
           "refId": "A",
           "interval":"5s"
-        },
-         {
-                      
-          "expr": "after_deleting_d1",
-          "legendFormat": "",
-          "refId": "B"
         }
+
       ],
       "gridPos": {
         "x": 0,

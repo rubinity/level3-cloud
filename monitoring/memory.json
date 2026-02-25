@@ -1,0 +1,64 @@
+{
+  "annotations": { "list": [] },
+  "description": "Simple Memory usage per node",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Memory Usage % per Node",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))",
+          "legendFormat": "{{instance}}",
+          "interval": "",
+          "refId": "A"
+        }
+      ],
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "all" } }
+    },
+    {
+  "datasource": "Prometheus",
+  "fieldConfig": {
+    "defaults": {
+      "unit": "gigabytes",
+      "decimals": 2
+    },
+    "overrides": []
+  },
+  "gridPos": { "h": 9, "w": 24, "x": 0, "y": 9 },
+  "id": 2,
+  "title": "Memory Available (GB) per Node",
+  "type": "timeseries",
+  "targets": [
+    {
+      "expr": "node_memory_MemAvailable_bytes / 1024 / 1024 / 1024",
+      "legendFormat": "{{instance}}",
+      "interval": "",
+      "refId": "B"
+    }
+  ],
+  "options": {
+    "legend": { "displayMode": "list", "placement": "bottom" },
+    "tooltip": { "mode": "all" },
+    "yaxis": { "show": true }
+  }
+}
+  ],
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["node", "memory"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Node Memory Dashboard",
+  "version": 1
+}

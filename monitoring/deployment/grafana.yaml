@@ -1,44 +1,119 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: prometheus-config
+  name: grafana-config
 data:
-  prometheus.yml: |
+  grafana.ini: |
+    [server]
+    protocol = http
+    http_addr =
+    http_port = 3000
+    root_url = https://rubinity.stackit.gg/grafana
+    serve_from_sub_path = true
+
+    [auth.anonymous]
+    enabled = true
+    org_role = Viewer
+
+    [users]
+    default_theme = light
+
+    [analytics]
+    reporting_enabled = false
+    check_for_updates = false
+
+    [log]
+    mode = console
+    level = info
+
+    [paths]
+    data = /var/lib/grafana
+    logs = /var/log/grafana
+    plugins = /var/lib/grafana/plugins
+    provisioning = /etc/grafana/provisioning
+  datasource.yaml: |
     apiVersion: 1
     datasources:
     - name: Prometheus
       type: prometheus
       access: proxy
-      url: http://prometheus:9090
+      url: https://rubinity.stackit.gg/prometheus
       isDefault: true
+      editable: false
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki.loki.svc.cluster.local:3100
+      isDefault: false
       editable: false
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prometheus
+  name: grafana
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus
+      app: grafana
   template:
     metadata:
       labels:
-        app: prometheus
+        app: grafana
     spec:
-      # serviceAccountName: goapi-sa
+      securityContext:
+        fsGroup: 472
+      serviceAccountName: goapi-sa
       containers:
-      - name: prometheus-cont
-        image: prom/prometheus:latest
-        ports:
-        - containerPort: 9090
+      - name: grafana-cont
+        image: grafana/grafana:latest
+        env:
+          - name: GF_SECURITY_ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                  name: grafana-admin
+                  key: admin-user
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                  name: grafana-admin
+                  key: admin-password
         volumeMounts:
-        - name: prometheus-config
-          mountPath: /etc/prometheus
+          - name: grafana-config
+            mountPath: /etc/grafana/grafana.ini
+            subPath: grafana.ini
+          - name: grafana-config
+            mountPath: /etc/grafana/provisioning/datasources/datasource.yaml
+            subPath: datasource.yaml
+          - name: grafana-storage
+            mountPath: /var/lib/grafana
+        ports:
+        - containerPort: 3000
       volumes:
-          - name: prometheus-config
-            configMap:
-              name: prometheus-config
+        - name: grafana-config
+          configMap:
+            name: grafana-config
+        - name: grafana-storage
+          persistentVolumeClaim:
+            claimName: grafana-pvc
 
+
+       
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-svc
+  labels:
+    app: grafana
+spec:
+  type: ClusterIP
+  ports:
+  - name: grafana
+    protocol: TCP
+    port: 3000
+    targetPort: 3000
+  selector:
+    app: grafana
  

@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kube-state-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: rubinity.stackit.gg
+    http:
+      paths:
+      - pathType: Exact
+        path: "/metrics"
+        backend:
+          service:
+            name: kube-state-metrics
+            port:
+              number: 8080

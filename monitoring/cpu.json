@@ -1,0 +1,66 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Simple CPU usage per node",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1679496840000,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "title": "CPU Usage % per Node",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "100 * (1 - avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])))",
+          "legendFormat": "{{instance}}",
+          "interval": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "all"
+        }
+      }
+    }
+  ],
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["node", "cpu"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Simple Node CPU Dashboard",
+  "version": 1
+}

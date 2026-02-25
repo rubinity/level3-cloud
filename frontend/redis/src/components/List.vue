@@ -18,14 +18,14 @@
       </tbody>
       </table>
     </div>
-  <p>{{ note }} <router-link to={{aurthurl}}>{{ authname }}</router-link></p>
+  <p>{{ note }} <router-link v-bind="{ to: authurl }">{{ authname }}</router-link></p>
  
   </div>
 </template>
 
 
 <script>
-import axios from '/Users/mariia.rubina13/Projects/cloud/week5/vue/node_modules/axios'
+import axios from '/Users/mariia.rubina13/Projects/cloud/frontend/node_modules/axios'
 export default {
   name: 'listRepl',
   props: {

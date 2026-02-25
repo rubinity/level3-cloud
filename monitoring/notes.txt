@@ -1,0 +1,16 @@
+prometheus-community/kube-state-metrics
+kubelet
+chart version 7.1.0        	2.18.0 
+helm install 2.18.0  oci://ghcr.io/prometheus-community/charts/kube-state-metrics
+
+kubectl get --raw /api/v1/nodes/shoot--38183bc8e9--mar-cluster-np-mariia-z1-67b65-fl4pv/proxy/metrics
+kubectl get --raw /api/v1/nodes/shoot--38183bc8e9--mar-cluster-np-mariia-z1-67b65-fl4pv/proxy/metrics/cadvisor
+
+kubectl get --raw /api/v1/nodes/shoot--38183bc8e9--mar-cluster-np-mariia-z1-67b65-fl4pv/proxy/stats/summary
+
+
+
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token

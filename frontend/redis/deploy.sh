@@ -1,5 +1,5 @@
 #!/bin/bash
-DIRPATH=/Users/mariia.rubina13/Projects/cloud/week5/vue/redis
+DIRPATH=/Users/mariia.rubina13/Projects/cloud/frontend/redis
 #delete old deployments and services
 kubectl delete -f "$DIRPATH/deployment/redis-ui.yaml" 
 # kubectl delete -f "$DIRPATH/deployment/service.yaml" 
@@ -16,3 +16,4 @@ sleep 30
 IP=$(kubectl get service redis-svc -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 done
 echo "$IP"
+# kubectl apply -f "/Users/mariia.rubina13/Projects/cloud/frontend/redis/deployment/redis-ui.yaml" 

@@ -13,7 +13,8 @@ import (
 	// "k8s.io/api"
 	"context"
 	"fmt"
-
+"log/slog"
+	// "os"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	// "fmt"
@@ -52,24 +53,25 @@ func Router(cli client.Client, clientset kubernetes.Interface) *gin.Engine {
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
 	}))
+	var logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	router.POST("/api/create",  auth.AuthMiddleware(rds), CreateReplHandler(cli))
-	router.DELETE("/api/delete", auth.AuthMiddleware(rds), DeleteReplHandler(cli))
-	router.GET("/api/list/:ns", auth.AuthMiddleware(rds), ListReplHandler(cli))
+	router.POST("/api/create",  auth.AuthMiddleware(rds), CreateReplHandler(cli, logger))
+	router.DELETE("/api/delete", auth.AuthMiddleware(rds), DeleteReplHandler(cli, logger))
+	router.GET("/api/list/:ns", auth.AuthMiddleware(rds), ListReplHandler(cli, logger))
 	router.POST("/api/auth", AuthHandler(rds, clientset))
 	router.POST("/api/logout", LogoutHandler(rds))
-	router.GET("/api/connection/:ns/:name", auth.AuthMiddleware(rds), ConnectionHandler(cli, clientset))
+	router.GET("/api/connection/:ns/:name", auth.AuthMiddleware(rds), ConnectionHandler(cli, clientset, logger))
 	return router
 }
 
 func TestRouter(cli client.Client, clientset kubernetes.Interface) *gin.Engine {
 	router := gin.Default()
 	router.Use(cors.Default())
-
-	router.POST("/api/create", CreateReplHandler(cli))
-	router.DELETE("/api/delete", DeleteReplHandler(cli))
-	router.GET("/api/list/:ns", ListReplHandler(cli))
-	router.GET("/api/connection/:ns/:name", ConnectionHandler(cli, clientset))
+	var logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))	
+	router.POST("/api/create", CreateReplHandler(cli, logger))
+	router.DELETE("/api/delete", DeleteReplHandler(cli, logger))
+	router.GET("/api/list/:ns", ListReplHandler(cli, logger))
+	router.GET("/api/connection/:ns/:name", ConnectionHandler(cli, clientset, logger))
 	return router
 }
 

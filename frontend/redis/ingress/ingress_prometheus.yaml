@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: rubinity.stackit.gg
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/prometheus"
+        backend:
+          service:
+            name: prometheus-svc
+            port:
+              number: 9090

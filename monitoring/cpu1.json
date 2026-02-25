@@ -1,0 +1,58 @@
+{
+  "annotations": { "list": [] },
+  "description": "Simple CPU usage per node with breakdown by mode",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "CPU Usage % per Node",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "100 * (1 - avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])))",
+          "legendFormat": "{{instance}}",
+          "interval": "",
+          "refId": "A"
+        }
+      ],
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "all" } }
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 9 },
+      "id": 2,
+      "title": "CPU Usage by Mode (stacked)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "100 * rate(node_cpu_seconds_total[5m])",
+          "legendFormat": "{{mode}} - {{instance}}",
+          "interval": "",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "all" },
+        "stacking": { "mode": "normal" }
+      }
+    }
+  ],
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["node", "cpu"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Node CPU Dashboard",
+  "version": 1
+}

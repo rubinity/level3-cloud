@@ -5,16 +5,16 @@
     <form v-on:submit.prevent="create">
     <p>Replication name: <input type="text" placeholder="replication name" required v-model="name"></p>
     <p>Replication namespace: <input type="text" placeholder=namespace v-model=namespace readonly></p>
-    <p>Cluster size: 1 - 3 <input type="text" placeholder="replication size" required v-model="size"></p>
+    <p>Cluster size: 1 - 3 <input type="text" placeholder="replication size" required v-model.number="size"></p>
     <button type="submit" action="create()"> Create </button>
     </form>
      <p>{{ status }}</p>
-     <p>{{ note }} <router-link to={{ aurthurl }}>{{ authname }}</router-link></p>
+     <p>{{ note }} <router-link v-bind="{ to: authurl }">{{ authname }}</router-link></p>
   </div>
 </template>
 
 <script>
-import axios from '/Users/mariia.rubina13/Projects/cloud/week5/vue/node_modules/axios'
+import axios from '/Users/mariia.rubina13/Projects/cloud/frontend/node_modules/axios'
 export default {
   name: 'CreateRepl',
   props: {
@@ -27,9 +27,6 @@ export default {
       namespace: "test2",
       status: null,
       code: 0,
-      req: {
-        "size": this.size, "namespace": this.namespace, "name": this.name
-      },
       note: null,
       authurl: null,
       authname: null,
@@ -37,16 +34,18 @@ export default {
   },
   methods: {
     create() {
-      axios
-      .post("https://rubinity.stackit.gg/api/create",{
+      console.log(this.req)
+      console.log(this.size)
+      var req = {
         "size": this.size, "namespace": this.namespace, "name": this.name
-      })
+      }
+      axios
+      .post("https://rubinity.stackit.gg/api/create", req)
       .then((response) => {
        // JSON responses are automatically parsed.
        this.code  = response.ok
        this.status = response.data.status;
        console.log(response);
-       console.log("request", this.rq);
       })
       .catch((e) => {
         console.log(e);

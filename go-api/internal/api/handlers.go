@@ -4,10 +4,12 @@ import (
 	// "log"
 	"net/http"
 	"strconv"
+	"log/slog"
 
 	// "os/exec"
 	// "encoding/json"
 	"Users/mariia.rubina13/Projects/cloud/week4/go-api/internal/auth"
+	"Users/mariia.rubina13/Projects/cloud/week4/go-api/internal/logging"
 	"fmt"
 
 	"context"
@@ -29,11 +31,17 @@ import (
 // @Param body body ReplicationRequest true "Replication info"
 // @Success 200 {object} RRInfo "Replication list"
 // @Router /list{ns} [get]
-func ListReplHandler(cli client.Client) gin.HandlerFunc {
+func ListReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var data []RRInfo
 		namespace := c.Param("ns")
+		ev := logging.AuditEvent{
+			Namespace: namespace,
+			Action: "List",
+			Result:  "Fail",
+			IP: c.ClientIP(),
+		}
 		list := getlist(cli, c.Request.Context(), namespace, "")
 		for _, item := range list.Items {
 			itemdata := RRInfo{
@@ -46,6 +54,8 @@ func ListReplHandler(cli client.Client) gin.HandlerFunc {
 		if data == nil {
 			data = make([]RRInfo, 0)
 		}
+		ev.Result = "Success"
+		logging.AuditLog(c, ev, logger)
 		c.JSON(http.StatusOK, data)
 	}
 }
@@ -106,7 +116,7 @@ func LogoutHandler(rds *auth.Redis) gin.HandlerFunc {
 // @Failure 400 {object} map[string]interface{} "Bad request"
 // @Failure 404 {object} map[string]interface{} "Not found"
 // @Router /connection/{ns}/{name} [get]
-func ConnectionHandler(cli client.Client, clientset kubernetes.Interface) gin.HandlerFunc {
+func ConnectionHandler(cli client.Client, clientset kubernetes.Interface, logger *slog.Logger) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		namespace := c.Param("ns")
@@ -154,15 +164,24 @@ func getEndpoint(clientset kubernetes.Interface) (endpoint string, err error){
 // @Failure 400 {object} map[string]interface{} "Bad request"
 // @Failure 404 {object} map[string]interface{} "Not found"
 // @Router /create [post]
-func CreateReplHandler(cli client.Client) gin.HandlerFunc {
+func CreateReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var repl v1beta2.RedisReplication
 		var req ReplicationRequest
+		ev := logging.AuditEvent{
+			Namespace: "",
+			Action: "Create",
+			Result:  "Fail",
+			IP: c.ClientIP(),
+		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"status": fmt.Sprintf("Not created. Error: %s", err.Error()),
 			})
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusBadRequest)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c,  ev, logger)
 			return
 		}
 		size := int32(req.Size)
@@ -175,10 +194,15 @@ func CreateReplHandler(cli client.Client) gin.HandlerFunc {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status": fmt.Sprintf("%s not created. Error: %s", req.Name, err.Error()),
 			})
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusNotFound)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c,  ev, logger)
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"status": fmt.Sprintf("Replication %s created. Cluster size: %d", req.Name, size),
 			})
+			ev.Result = "Success"
+			logging.AuditLog(c,  ev, logger)
 		}
 	}
 }
@@ -200,7 +224,7 @@ func jsonError(c *gin.Context, code int, name string, err string) {
 // @Failure 404 {object} map[string]interface{} "Not found"
 // @Failure 409 {object} map[string]interface{} "Conflict"
 // @Router /delete [post]
-func DeleteReplHandler(cli client.Client) gin.HandlerFunc {
+func DeleteReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var req DeleteRequest

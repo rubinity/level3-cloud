@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import axios from '/Users/mariia.rubina13/Projects/cloud/week5/vue/node_modules/axios'
+import axios from '/Users/mariia.rubina13/Projects/cloud/frontend/node_modules/axios'
 export default {
   name: 'AuthUser',
   props: {

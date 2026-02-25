@@ -9,13 +9,12 @@
     <p>host: {{ host}} </p>
     <p>port: {{ port }}</p>
     <!-- <p>{{ status }}</p> -->
-    <p>{{ note }} <router-link to={{ aurthurl }}>{{ authname }}</router-link></p>
-    
+    <p>{{ note }} <router-link v-bind="{ to: authurl }">{{ authname }}</router-link></p>
   </div>
 </template>
 
 <script>
-import axios from '/Users/mariia.rubina13/Projects/cloud/week5/vue/node_modules/axios'
+import axios from '/Users/mariia.rubina13/Projects/cloud/frontend/node_modules/axios'
 export default {
   name: 'ConnectInfo',
   props: {
@@ -55,7 +54,7 @@ export default {
         if (e.response.status == "401"){
             this.status = e
             this.note = "Please login:"
-            this.authurl = "/auth"
+            this.authurl = '/auth'
             this.authname = "Auth"
           }
           else{
