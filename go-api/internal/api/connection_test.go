@@ -11,7 +11,7 @@ import (
 	k8fake "k8s.io/client-go/kubernetes/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"github.com/OT-CONTAINER-KIT/redis-operator/api/redisreplication/v1beta2"
+	redislibrepl "github.com/OT-CONTAINER-KIT/redis-operator/api/redisreplication/v1beta2"
 	corev1 "k8s.io/api/core/v1"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
@@ -58,8 +58,8 @@ func SetService() * corev1.Service{
 	return fakeService
 }
 
-func SetRepl() * v1beta2.RedisReplication{
-	fakeRepl := &v1beta2.RedisReplication{
+func SetRepl() * redislibrepl.RedisReplication{
+	fakeRepl := &redislibrepl.RedisReplication{
     ObjectMeta: metav1.ObjectMeta{
         Name:      "realname",   // match the name in your request
         Namespace: "realns",     // match the namespace in your request
@@ -68,8 +68,8 @@ func SetRepl() * v1beta2.RedisReplication{
 	return fakeRepl
 }
 
-// func SetUndelRepl() * v1beta2.RedisReplication{
-// 	fakeRepl := &v1beta2.RedisReplication{
+// func SetUndelRepl() * redislibrepl.RedisReplication{
+// 	fakeRepl := &redislibrepl.RedisReplication{
 //     ObjectMeta: metav1.ObjectMeta{
 //         Name:      "realname",   // match the name in your request
 //         Namespace: "realns",     // match the namespace in your request
@@ -79,9 +79,9 @@ func SetRepl() * v1beta2.RedisReplication{
 // 	return fakeRepl
 // }
 
-func InitClients(fakeService * corev1.Service, fakeRepl * v1beta2.RedisReplication)(cli client.Client, clientset kubernetes.Interface){
+func InitClients(fakeService * corev1.Service, fakeRepl * redislibrepl.RedisReplication)(cli client.Client, clientset kubernetes.Interface){
 	scheme := runtime.NewScheme()
-	v1beta2.AddToScheme(scheme)
+	redislibrepl.AddToScheme(scheme)
 	if fakeService != nil{
 		clientset = k8fake.NewSimpleClientset(fakeService)
 	} else {

@@ -2,9 +2,9 @@ package api
 
 import (
 	// "log"
+	"log/slog"
 	"net/http"
 	"strconv"
-	"log/slog"
 
 	// "os/exec"
 	// "encoding/json"
@@ -15,6 +15,7 @@ import (
 	"context"
 
 	"github.com/OT-CONTAINER-KIT/redis-operator/api/redisreplication/v1beta2"
+	redislibsent "github.com/OT-CONTAINER-KIT/redis-operator/api/redissentinel/v1beta2"
 	"github.com/gin-gonic/gin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -38,9 +39,9 @@ func ListReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 		namespace := c.Param("ns")
 		ev := logging.AuditEvent{
 			Namespace: namespace,
-			Action: "List",
-			Result:  "Fail",
-			IP: c.ClientIP(),
+			Action:    "List",
+			Result:    "Fail",
+			IP:        c.ClientIP(),
 		}
 		list := getlist(cli, c.Request.Context(), namespace, "")
 		for _, item := range list.Items {
@@ -60,16 +61,26 @@ func ListReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 	}
 }
 
-var demoUser = Namespace{ Namespace: "test2", Password: "pass"}
-func AuthHandler(rds *auth.Redis, clientset kubernetes.Interface) gin.HandlerFunc {
+var demoUser = Namespace{Namespace: "test2", Password: "pass"}
+
+func AuthHandler(rds *auth.Redis, clientset kubernetes.Interface, logger *slog.Logger) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var in struct {
 			Namespace string `json:"namespace"`
-			Password string `json:"password"`
+			Password  string `json:"password"`
+		}
+		ev := logging.AuditEvent{
+			Namespace: in.Namespace,
+			Action:    "Authorization",
+			Result:    "Fail",
+			IP:        c.ClientIP(),
 		}
 		if err := c.ShouldBindJSON(&in); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "invalid json"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid json"})
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusBadRequest)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c, ev, logger)
 			return
 		}
 		if in.Namespace != demoUser.Namespace || in.Password != demoUser.Password {
@@ -102,10 +113,9 @@ func LogoutHandler(rds *auth.Redis) gin.HandlerFunc {
 			}
 		}
 		auth.ClearAuthCookies(c)
-		c.JSON(http.StatusOK, gin.H{"ok": true})	
+		c.JSON(http.StatusOK, gin.H{"ok": true})
 	}
 }
-
 
 // @Summary Get connection info
 // @Description Returns connection information by namespace and name
@@ -121,11 +131,20 @@ func ConnectionHandler(cli client.Client, clientset kubernetes.Interface, logger
 	return func(c *gin.Context) {
 		namespace := c.Param("ns")
 		name := c.Param("name")
+		ev := logging.AuditEvent{
+			Namespace: namespace,
+			Action:    "GetConnection",
+			Result:    "Fail",
+			IP:        c.ClientIP(),
+		}
 		repl, err := GetRepl(cli, c.Request.Context(), namespace, name)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status": fmt.Sprintf("%s not found Error: %s", name, err.Error()),
 			})
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusBadRequest)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c, ev, logger)
 			return
 		}
 		service_name := name + "-additional"
@@ -134,16 +153,21 @@ func ConnectionHandler(cli client.Client, clientset kubernetes.Interface, logger
 			c.JSON(http.StatusNotFound, gin.H{
 				"status": fmt.Sprintf("service not found. Error: %s", err.Error()),
 			})
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusBadRequest)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c, ev, logger)
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"connection": repl.Status.ConnectionInfo,
 			"public_ip":  service.Status.LoadBalancer.Ingress[0].IP,
 		})
+		ev.Result = "Success"
+		logging.AuditLog(c, ev, logger)
 	}
 }
 
-func getEndpoint(clientset kubernetes.Interface) (endpoint string, err error){
+func getEndpoint(clientset kubernetes.Interface) (endpoint string, err error) {
 	service, err := clientset.CoreV1().Endpoints("redis-auth").Get(context.TODO(), "store-master", metav1.GetOptions{})
 	if err != nil {
 		return "", err
@@ -168,12 +192,13 @@ func CreateReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var repl v1beta2.RedisReplication
+		var sent redislibsent.RedisSentinel
 		var req ReplicationRequest
 		ev := logging.AuditEvent{
 			Namespace: "",
-			Action: "Create",
-			Result:  "Fail",
-			IP: c.ClientIP(),
+			Action:    "Create",
+			Result:    "Fail",
+			IP:        c.ClientIP(),
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -181,7 +206,7 @@ func CreateReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 			})
 			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusBadRequest)
 			ev.ErrorMessage = err.Error()
-			logging.AuditLog(c,  ev, logger)
+			logging.AuditLog(c, ev, logger)
 			return
 		}
 		size := int32(req.Size)
@@ -196,13 +221,23 @@ func CreateReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 			})
 			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusNotFound)
 			ev.ErrorMessage = err.Error()
-			logging.AuditLog(c,  ev, logger)
+			logging.AuditLog(c, ev, logger)
 		} else {
+			setSentinel(&sent, req.Name, req.Namespace)
+			err = cli.Create(c.Request.Context(), &sent)
+			if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status": fmt.Sprintf("Sentinel for %s not created. Error: %s", req.Name, err.Error()),
+			})
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusNotFound)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c, ev, logger)
+			} 
 			c.JSON(http.StatusOK, gin.H{
 				"status": fmt.Sprintf("Replication %s created. Cluster size: %d", req.Name, size),
 			})
 			ev.Result = "Success"
-			logging.AuditLog(c,  ev, logger)
+			logging.AuditLog(c, ev, logger)
 		}
 	}
 }
@@ -229,22 +264,39 @@ func DeleteReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req DeleteRequest
 		var err error
+		ev := logging.AuditEvent{
+			Namespace: req.Namespace,
+			Action:    "Delete",
+			Result:    "Fail",
+			IP:        c.ClientIP(),
+		}
 		if err = c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusBadRequest)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c, ev, logger)
 			return
 		}
 		repl, err := GetRepl(cli, c.Request.Context(), req.Namespace, req.Name)
 		if err != nil {
 			jsonError(c, http.StatusNotFound, req.Name, err.Error())
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusNotFound)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c, ev, logger)
 			return
 		}
 		err = cli.Delete(c.Request.Context(), repl)
 		if err != nil {
 			jsonError(c, http.StatusConflict, req.Name, err.Error())
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusConflict)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c, ev, logger)
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": fmt.Sprintf("%s deleted.", req.Name),
 		})
+		ev.Result = "Success"
+		logging.AuditLog(c, ev, logger)
 	}
 }

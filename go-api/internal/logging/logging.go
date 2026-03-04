@@ -1,19 +1,20 @@
 package logging
-import(
+
+import (
+	"context"
 	"log/slog"
 	"os"
-	"context"
 	// "net/http"
 	// "strings"
 	// "github.com/gin-gonic/gin"
 )
 
 type AuditEvent struct {
-	Namespace       string
+	Namespace    string
 	Action       string
 	Result       string
 	IP           string
-	ErrorType 	string
+	ErrorType    string
 	ErrorMessage string
 }
 
@@ -49,16 +50,13 @@ func ErrorTypeFromStatus(status int) string {
 	}
 }
 
-
-
-
 func AuditLog(ctx context.Context, ev AuditEvent, logger *slog.Logger) {
 	attrs := []slog.Attr{
-		slog.String("action", ev.Namespace),
+		slog.String("namespace", ev.Namespace),
 		slog.String("action", ev.Action),
 		slog.String("result", ev.Result),
 		slog.String("ip", ev.IP),
-}
+	}
 	if ev.ErrorType != "" {
 		attrs = append(attrs, slog.String("error_type", ev.ErrorType))
 	}
