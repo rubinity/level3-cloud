@@ -1,6 +1,7 @@
 cp.sh
 cp_keys.sh
 notes/
+keys/
 week3/tf_files/.terraform/
 .terraform.lock.hcl
 go-api/api

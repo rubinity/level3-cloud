@@ -121,6 +121,16 @@ func GetRepl(cli client.Client, ctx context.Context, namespace string, name stri
 	return &repl, err
 }
 
+func GetSent(cli client.Client, ctx context.Context, namespace string, name string) (*redislibsent.RedisSentinel, error) {
+	var sent redislibsent.RedisSentinel
+	var key client.ObjectKey
+
+	key.Name = name
+	key.Namespace = namespace
+	err := cli.Get(ctx, key, &sent)
+	return &sent, err
+}
+
 
 func getlist(cli client.Client, ctx context.Context, namespace string, name string) *redislibrepl.RedisReplicationList {
 	var redislist redislibrepl.RedisReplicationList

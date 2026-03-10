@@ -61,7 +61,7 @@ func ListReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 	}
 }
 
-var demoUser = Namespace{Namespace: "test2", Password: "pass"}
+var demoUser = Namespace{Namespace: "test2", Password: "level3cloud"}
 
 func AuthHandler(rds *auth.Redis, clientset kubernetes.Interface, logger *slog.Logger) gin.HandlerFunc {
 
@@ -293,6 +293,24 @@ func DeleteReplHandler(cli client.Client, logger *slog.Logger) gin.HandlerFunc {
 			logging.AuditLog(c, ev, logger)
 			return
 		}
+		sname := req.Name + "-sentinel"
+		sent, err := GetSent(cli, c.Request.Context(), req.Namespace, sname)
+		if err != nil {
+			jsonError(c, http.StatusNotFound, sname, err.Error())
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusNotFound)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c, ev, logger)
+			return
+		}
+		err = cli.Delete(c.Request.Context(), sent)
+		if err != nil {
+			jsonError(c, http.StatusConflict, sname, err.Error())
+			ev.ErrorType = logging.ErrorTypeFromStatus(http.StatusConflict)
+			ev.ErrorMessage = err.Error()
+			logging.AuditLog(c, ev, logger)
+			return
+		}
+
 		c.JSON(http.StatusOK, gin.H{
 			"status": fmt.Sprintf("%s deleted.", req.Name),
 		})

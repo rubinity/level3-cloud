@@ -1,7 +1,7 @@
 #!/bin/bash
 DIRPATH=/Users/mariia.rubina13/Projects/cloud/week4
 #delete old deployments and services
-kubectl delete -f "$DIRPATH/deployment/api.yaml" 
+kubectl delete -f "deployment/api.yaml" 
 # kubectl delete -f "$DIRPATH/deployment/service.yaml" 
 #apply new
 kubectl apply -f "$DIRPATH/deployment/api.yaml"

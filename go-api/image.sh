@@ -6,7 +6,7 @@ make
 # docker image rm api_image
 #build image
 docker buildx build --platform linux/amd64 -t api_image .
-# # tag image
+# # tag imagemake
 # docker tag api_image:latest rubinity/mariia-api:latest
 # # push image
 # docker push rubinity/mariia-api:latest

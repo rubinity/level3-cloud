@@ -18,8 +18,8 @@
 
 # 1. Preparation
 # 1.1. Service accounts
-Create a service account on the Stackit portal in AIM AND MANAGEMENT -> Service accounts  
-Via AIM AND MANAGEMENT -> Access give owner access to this account  
+Create a service account on the Stackit portal in IAM AND MANAGEMENT -> Service accounts  
+Via IAM AND MANAGEMENT -> Access give owner access to this account  
 Create a key for the service account and download a json service account key file 
 create a credential file with path to the json key  
 

@@ -12,11 +12,7 @@ type Redis struct{ Client *redis.Client }
 
 func NewRedis(endpoint string) *Redis {
 	println("endpr", endpoint)
-	addr := endpoint //!!!!later change to env
-	// addr := os.Getenv("REDIS_ADDR")
-	// if addr == "" {
-	// 	addr = "localhost:6379"
-	// }
+	addr := endpoint
 	rdb := redis.NewClient(&redis.Options{Addr: addr})
 	return &Redis{Client: rdb}
 }

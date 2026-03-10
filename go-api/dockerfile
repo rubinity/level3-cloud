@@ -1,6 +1,5 @@
 FROM debian
 COPY ./api /api
-COPY ./.env /.env
 RUN chmod +x /api
 EXPOSE 80
 ENTRYPOINT /api

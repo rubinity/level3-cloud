@@ -18,5 +18,11 @@ spec:
         image: registry.onstackit.cloud/mariia-api/api_image:latest
         ports:
         - containerPort: 80
+        env:
+        - name: ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api-secret
+              key: ACCESS_SECRET
       imagePullSecrets:
         - name: stackit-registry
